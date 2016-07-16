@@ -46,8 +46,7 @@ star_index_files = (
 # TODO: Place the Log file somewhere better than the root
 rule build_star_index:
     input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff'
-    output: expand('STAR_index_{{genome_build}}_{{transcriptome}}/{filename}',
-                   filename=star_index_files)
+    output: expand('STAR_index_{{genome_build}}_{{transcriptome}}/{filename}', filename=star_index_files)
     params: outdir='STAR_index_{wildcards.genome_build}_{wildcards.transcriptome}'
     threads: 16
     run:
