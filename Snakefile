@@ -1,4 +1,10 @@
 import os.path
+import shutil
+
+def ensure_empty_dir(path):
+    if os.path.exists(path):
+        shutil.rmtree(path)
+    os.makedirs(path)
 
 rule all:
     input: STAR_ref="STAR_index_hg38.analysisSet_knownGene/SA",
@@ -37,20 +43,24 @@ star_index_files = (
     'sjdbList.out.tab',
 )
 
+# TODO: Place the Log file somewhere better than the root
 rule build_star_index:
     input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff'
-    output: expand('STAR_index_{{genome_build}}_{{transcriptome}}/{filename}', filename=star_index_files)
+    output: expand('STAR_index_{{genome_build}}_{{transcriptome}}/{filename}',
+                   filename=star_index_files)
+    params: outdir='STAR_index_{wildcards.genome_build}_{wildcards.transcriptome}'
     threads: 16
-    shell: '''
-    mkdir -p STAR_index_{wildcards.genome_build:q}_{wildcards.transcriptome:q} && \
+    run:
+        ensure_empty_dir(params.outdir)
+        shell('''
         STAR --runMode genomeGenerate \
-        --genomeDir STAR_index_{wildcards.genome_build:q}_{wildcards.transcriptome:q} \
-        --genomeFastaFiles {input.genome_fa:q} \
-        --sjdbGTFfile {input.transcriptome_gff:q} \
-        --sjdbGTFfeatureExon exon --sjdbGTFtagExonParentTranscript Parent \
-        --sjdbOverhang 100 \
-        --runThreadN {threads:q}
-    '''
+            --genomeDir {params.outdir:q} \
+            --genomeFastaFiles {input.genome_fa:q} \
+            --sjdbGTFfile {input.transcriptome_gff:q} \
+            --sjdbGTFfeatureExon exon --sjdbGTFtagExonParentTranscript Parent \
+            --sjdbOverhang 100 \
+            --runThreadN {threads:q}
+        ''')
 
 # TODO: Make it configurable
 BBMAP=os.path.expanduser("~/opt/bbmap/bbmap.sh")
@@ -66,9 +76,12 @@ bbmap_index_files = (
 rule build_bbmap_index:
     input: genome_fa='{genome_build}.fa'
     output: expand('BBMap_index_{{genome_build}}/{filename}', filename=bbmap_index_files)
-    threads: 8
-    shell: '''
-    {BBMAP:q} ref={input.genome_fa:q} \
-        path=BBMap_index_{wildcards.genome_build:q} \
-        t={threads}
-    '''
+    params: outdir='BBMap_index_{wildcards.genome_build}'
+    threads: 16
+    run:
+        ensure_empty_dir(params.outdir)
+        shell('''
+        {BBMAP:q} ref={input.genome_fa:q} \
+            path={params.outdir:q} \
+            t={threads}
+        ''')
