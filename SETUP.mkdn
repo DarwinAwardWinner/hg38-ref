@@ -13,9 +13,6 @@ See http://hgdownload.cse.ucsc.edu/goldenpath/hg38/bigZips/analysisSet/
 
 ## Downloading knownGenes.gtf and convert to gff
 
-```sh
-brew install kent-tools cufflinks
-```
 http://hgdownload.cse.ucsc.edu/downloads.html#source_downloads
 
 See http://genomewiki.ucsc.edu/index.php/Genes_in_gtf_or_gff_format

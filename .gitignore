@@ -1,0 +1,5 @@
+.snakemake
+/hg38.analysisSet.2bit
+/hg38.analysisSet.fa
+/knownGene.gff
+/knownGene.gtf
