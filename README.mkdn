@@ -1,0 +1,5 @@
+This is a [Snakemake][1] workflow for downloading the hg38 genome &
+transcriptome and building indices for various alignment and mapping
+tools, in a completely automated fashion.
+
+[1]: https://bitbucket.org/snakemake/snakemake/wiki/Home
