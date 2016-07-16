@@ -1,3 +1,5 @@
+import os.path
+
 rule all:
     input: STAR_ref="STAR_index_hg38.analysisSet_knownGene/SA",
            BBMap_ref="BBMap_index_hg38.analysisSet/ref/genome/1/summary.txt",
@@ -51,7 +53,7 @@ rule build_star_index:
     '''
 
 # TODO: Make it configurable
-BBMAP="~/opt/bbmap/bbmap.sh"
+BBMAP=os.path.expanduser("~/opt/bbmap/bbmap.sh")
 
 # File names are not really certain for bbmap, so just list the few
 # that are. These will be used as indicator files. TODO: Maybe use
@@ -68,6 +70,5 @@ rule build_bbmap_index:
     shell: '''
     {BBMAP:q} ref={input.genome_fa:q} \
         path=BBMap_index_{wildcards.genome_build:q} \
-        t={threads} && \
-        touch BBMap_index_{wildcards.genome_build:q}/BBMAP_REF_EXISTS
+        t={threads}
     '''
