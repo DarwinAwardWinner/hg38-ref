@@ -1,5 +1,6 @@
 rule all:
-    input: "STAR_index_hg38.analysisSet_knownGene/SA"
+    input: STAR_ref="STAR_index_hg38.analysisSet_knownGene/SA",
+           BBMap_ref="BBMap_index_hg38.analysisSet/ref/genome/1/summary.txt",
 
 rule get_hg38_analysisSet_twoBit:
     output: 'hg38.analysisSet.2bit'
@@ -47,4 +48,26 @@ rule build_star_index:
         --sjdbGTFfeatureExon exon --sjdbGTFtagExonParentTranscript Parent \
         --sjdbOverhang 100 \
         --runThreadN {threads:q}
+    '''
+
+# TODO: Make it configurable
+BBMAP="~/opt/bbmap/bbmap.sh"
+
+# File names are not really certain for bbmap, so just list the few
+# that are. These will be used as indicator files. TODO: Maybe use
+# dynamic files to include every file produced in the directory?
+bbmap_index_files = (
+    "ref/genome/1/info.txt",
+    "ref/genome/1/summary.txt",
+)
+
+rule build_bbmap_index:
+    input: genome_fa='{genome_build}.fa'
+    output: expand('BBMap_index_{{genome_build}}/{filename}', filename=bbmap_index_files)
+    threads: 8
+    shell: '''
+    {BBMAP:q} ref={input.genome_fa:q} \
+        path=BBMap_index_{wildcards.genome_build:q} \
+        t={threads} && \
+        touch BBMap_index_{wildcards.genome_build:q}/BBMAP_REF_EXISTS
     '''
