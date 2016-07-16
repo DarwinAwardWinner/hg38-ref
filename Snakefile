@@ -19,6 +19,8 @@ rule gtf_to_gff3:
     output: '{basename}.gff'
     shell: 'gffread -FOE {input:q} -o {output:q}'
 
+# TODO: Write a function to compute the input files for a STAR index.
+# Also do so with BBMap, etc.
 star_index_files = (
     'chrLength.txt',
     'chrNameLength.txt',
@@ -32,12 +34,12 @@ star_index_files = (
     'sjdbList.out.tab',
 )
 
-rule build_STAR_index:
+rule build_star_index:
     input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff'
     output: expand('STAR_index_{{genome_build}}_{{transcriptome}}/{filename}', filename=star_index_files)
-    threads: 4
+    threads: 16
     shell: '''
-    mkdir -p hg38-star && \
+    mkdir -p STAR_index_{wildcards.genome_build:q}_{wildcards.transcriptome:q} && \
         STAR --runMode genomeGenerate \
         --genomeDir STAR_index_{wildcards.genome_build:q}_{wildcards.transcriptome:q} \
         --genomeFastaFiles {input.genome_fa:q} \
