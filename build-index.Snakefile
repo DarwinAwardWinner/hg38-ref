@@ -174,7 +174,7 @@ rule build_tophat2_index:
             basename='TH2_index_{genome_build}_{transcriptome}/index',
     shell: '''
     tophat2 --GTF {input.transcriptome_gff:q} \
-      --transcriptome-index={wildcards.basename:q} \
+      --transcriptome-index={params.basename:q} \
       {params.bt2_index_basename:q}
     '''
 
