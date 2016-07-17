@@ -22,7 +22,7 @@ rule get_hisat2_index_tar:
 
 rule unpack_hisat2_index:
     input: 'grch38_snp_tran.tar.gz'
-    output: expand('HISAT2_index_grch38_snp_tran/index.{num}.ht2', list(range(1, 9)))
+    output: expand('HISAT2_index_grch38_snp_tran/index.{num}.ht2', num=list(range(1, 9)))
     params: outdir='HISAT2_index_grch38_snp_tran',
             src_basename='genome_snp_tran',
             dest_basename='index',
