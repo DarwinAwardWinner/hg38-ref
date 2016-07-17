@@ -186,7 +186,7 @@ rule unpack_hisat2_index:
     shell: '''
     mkdir -p {params.outdir:q} && \
       tar -C {params.outdir:q} --strip-components 1 \
-        -s /^genome_snp_tran/index/ \
+        --transform 's/genome_snp_tran/index/' \
         -xzvf {input:q}
     '''
 
