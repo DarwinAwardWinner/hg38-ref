@@ -22,6 +22,68 @@ rule build_bowtie1_index:
         bowtie-build --large-index {input.genome_fa:q} {params.basename:q}
     '''
 
+_bt2_index_file_infixes = ('1', '2', '3', '4', 'rev.1', 'rev.2',)
+def bt2_index_files(path, prefix='index', large=True):
+    suffix = "bt2"
+    if large:
+        suffix += "l"
+    fnames = ('{prefix}.{infix}.{suffix}'.format(prefix=prefix, infix=x, suffix=suffix)
+              for x in _bt2_index_file_infixes)
+    return tuple(os.path.join(path, f) for f in fnames)
+
+rule build_bowtie2_index:
+    input: genome_fa='{genome_build}.fa'
+    output: bt2_index_files('BT2_index_{genome_build}', 'index', large=True)
+    params: outdir='BT2_index_{wildcards.genome_build}',
+            basename='BT2_index_{wildcards.genome_build}/index'
+    shell: '''
+    mkdir -p {params.outdir:q} && \
+        bowtie2-build --large-index {input.genome_fa:q} {params.basename:q}
+    '''
+
+bwa_index_files = (
+    'index.amb',
+    'index.ann',
+    'index.bwt',
+    'index.pac',
+    'index.sa',
+)
+rule build_bwa_index:
+    input: genome_fa='{genome_build}.fa'
+    output: expand('BWA_index_{{genome_build}}/{filename}', filename=bwa_index_files)
+    params: outdir='BWA_index_{wildcards.genome_build}',
+            basename='BWA_index_{wildcards.genome_build}/index'
+    shell: '''
+    mkdir -p {params.outdir:q} && \
+        bwa index -a bwtsw -p {params.basename:q} {input.genome_fa:q}
+    '''
+
+# TODO: Make it configurable
+BBMAP=os.path.expanduser("~/opt/bbmap/bbmap.sh")
+
+# File names are not all consistent for bbmap, so just list the few
+# that are. These will be used as indicator files for the presence of
+# the index.
+_bbmap_index_files = (
+    "ref/genome/1/info.txt",
+    "ref/genome/1/summary.txt",
+)
+def bbmap_index_files(path):
+    return tuple(os.path.join(path, f) for f in _bbmap_index_files)
+
+rule build_bbmap_index:
+    input: genome_fa='{genome_build}.fa'
+    output: bbmap_index_files('BBMap_index_{genome_build}')
+    params: outdir='BBMap_index_{wildcards.genome_build}'
+    threads: 16
+    run:
+        ensure_empty_dir(params.outdir)
+        shell('''
+        {BBMAP:q} ref={input.genome_fa:q} \
+            path={params.outdir:q} \
+            t={threads}
+        ''')
+
 # TODO: Write a function to compute the input files for a STAR index.
 # Also do so with BBMap, etc.
 star_index_files = (
