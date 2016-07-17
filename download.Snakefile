@@ -16,7 +16,7 @@ rule get_knownGene_gtf:
     shell: 'genePredToGtf -addComments -utr hg38 knownGene {output:q}'
 
 rule get_hisat2_index_tar:
-    input: FTP('ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch38_snp_tran.tar.gz')
+    input: FTP.remote('ftp.ccb.jhu.edu/pub/infphilo/hisat2/data/grch38_snp_tran.tar.gz')
     output: 'grch38_snp_tran.tar.gz'
     shell: 'mv {input:q} {output:q}'
 
