@@ -41,16 +41,21 @@ rule build_bowtie2_index:
         bowtie2-build --large-index {input.genome_fa:q} {params.basename:q}
     '''
 
-bwa_index_files = (
-    'index.amb',
-    'index.ann',
-    'index.bwt',
-    'index.pac',
-    'index.sa',
+_bwa_index_suffixes = (
+    '.amb',
+    '.ann',
+    '.bwt',
+    '.pac',
+    '.sa',
 )
+def bwa_index_files(path, prefix='index'):
+    fnames = ('{prefix}.{suffix}'.format(prefix=prefix, suffix=s)
+              for s in _bwa_index_file_infixes)
+    return tuple(os.path.join(path, f) for f in fnames)
+
 rule build_bwa_index:
     input: genome_fa='{genome_build}.fa'
-    output: expand('BWA_index_{{genome_build}}/{filename}', filename=bwa_index_files)
+    output: bwa_index_files('BWA_index_{genome_build}', 'index')
     params: outdir='BWA_index_{wildcards.genome_build}',
             basename='BWA_index_{wildcards.genome_build}/index'
     shell: '''
@@ -64,12 +69,12 @@ BBMAP=os.path.expanduser("~/opt/bbmap/bbmap.sh")
 # File names are not all consistent for bbmap, so just list the few
 # that are. These will be used as indicator files for the presence of
 # the index.
-_bbmap_index_files = (
+_bbmap_index_filenames = (
     "ref/genome/1/info.txt",
     "ref/genome/1/summary.txt",
 )
 def bbmap_index_files(path):
-    return tuple(os.path.join(path, f) for f in _bbmap_index_files)
+    return tuple(os.path.join(path, f) for f in _bbmap_index_filenames)
 
 rule build_bbmap_index:
     input: genome_fa='{genome_build}.fa'
@@ -86,7 +91,7 @@ rule build_bbmap_index:
 
 # TODO: Write a function to compute the input files for a STAR index.
 # Also do so with BBMap, etc.
-star_index_files = (
+_star_index_filenames = (
     'chrLength.txt',
     'chrNameLength.txt',
     'chrName.txt',
@@ -98,11 +103,14 @@ star_index_files = (
     'sjdbInfo.txt',
     'sjdbList.out.tab',
 )
+def star_index_files(path):
+    '''Return a tuple of all STAR index files for path.'''
+    return tuple(os.path.join(path, f) for f in _star_index_filenames)
 
 # TODO: Place the Log file somewhere better than the root
 rule build_star_index:
     input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff'
-    output: expand('STAR_index_{{genome_build}}_{{transcriptome}}/{filename}', filename=star_index_files)
+    output: star_index_files('STAR_index_{genome_build}_{transcriptome}')
     params: outdir='STAR_index_{wildcards.genome_build}_{wildcards.transcriptome}'
     threads: 16
     run:
@@ -117,8 +125,6 @@ rule build_star_index:
             --runThreadN {threads:q}
         ''')
 
-# TODO: Make it configurable
-BBMAP=os.path.expanduser("~/opt/bbmap/bbmap.sh")
 
 # File names are not really certain for bbmap, so just list the few
 # that are. These will be used as indicator files. TODO: Maybe use
