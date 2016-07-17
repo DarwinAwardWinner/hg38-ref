@@ -4,6 +4,24 @@ import os.path
 
 from localutils import *
 
+_bt1_index_file_infixes = ('1', '2', '3', '4', 'rev.1', 'rev.2',)
+def bt1_index_files(path, prefix='index', large=True):
+    suffix = "ebwt"
+    if large:
+        suffix += "l"
+    fnames = ('{prefix}.{infix}.{suffix}'.format(prefix=prefix, infix=x, suffix=suffix)
+              for x in _bt1_index_file_infixes)
+    return tuple(os.path.join(path, f) for f in fnames)
+rule build_bowtie1_index:
+    input: genome_fa='{genome_build}.fa'
+    output: bt1_index_files('BT1_index_{genome_build}', 'index', large=True)
+    params: outdir='BT1_index_{wildcards.genome_build}',
+            basename='BT1_index_{wildcards.genome_build}/index'
+    shell: '''
+    mkdir -p {params.outdir:q} && \
+        bowtie-build --large-index {input.genome_fa:q} {params.basename:q}
+    '''
+
 # TODO: Write a function to compute the input files for a STAR index.
 # Also do so with BBMap, etc.
 star_index_files = (
