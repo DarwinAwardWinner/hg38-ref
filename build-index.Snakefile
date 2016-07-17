@@ -22,10 +22,11 @@ def bt2_index_files(path, prefix='index', large=True):
               for x in _bt2_index_file_infixes)
     return tuple(os.path.join(path, f) for f in fnames)
 
-_th2_index_suffixes = ('.gff', '.fa', '.fa.tlst', '.fa.ver')
-def th2_index_files(path, prefix='index', large=True):
+# These are in addition to the bowtie2 files for the same prefix
+_tophat2_index_suffixes = ('.gff', '.fa', '.fa.tlst', '.fa.ver')
+def tophat2_index_files(path, prefix='index', large=True):
     fnames = ('{prefix}{suffix}'.format(prefix=prefix, suffix=s)
-              for s in _bwa_index_suffixes)
+              for s in _tophat2_index_suffixes)
     paths = tuple(os.path.join(path, f) for f in fnames)
     return paths + bt2_index_files(path, prefix, large)
 
@@ -86,7 +87,7 @@ rule all_indices:
            bwa=bwa_index_files('BWA_index_hg38.analysisSet', 'index'),
            bbmap=bbmap_index_files('BBMap_index_hg38.analysisSet'),
            STAR=star_index_files('STAR_index_hg38.analysisSet_knownGene'),
-           TH2=th2_index_files('TH2_index_hg38.analysisSet_knownGene', 'index', large=True),
+           TH2=tophat2_index_files('TH2_index_hg38.analysisSet_knownGene', 'index', large=True),
            salmon=salmon_index_files('Salmon_index_hg38.analysisSet_knownGene'),
 
 rule build_bowtie1_index:
@@ -156,14 +157,16 @@ rule build_star_index:
         ''')
 
 rule build_tophat2_index:
-    input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff'
+    input: bt2_idx=bt2_index_files('BT2_index_{genome_build}', 'index', large=True),
+           transcriptome_gff='{transcriptome}.gff'
     output: tophat2_index_files('TH2_index_{genome_build}_{transcriptome}', 'index')
     params: outdir='TH2_index_{genome_build}_{transcriptome}',
+            bt2_index_basename=os.path.join('BT2_index_{genome_build}', 'index'),
             basename='TH2_index_{genome_build}_{transcriptome}/index',
     shell: '''
     tophat2 --GTF {input.transcriptome_gff:q} \
       --transcriptome-index={wildcards.basename:q} \
-      {input.genome_fa:q}
+      {params.bt2_index_basename:q}
     '''
 
 rule build_salmon_index:
