@@ -63,8 +63,8 @@ def star_index_files(path):
 rule all_indices:
     input: BT1=bt1_index_files('BT1_index_hg38.analysisSet', 'index', large=True),
            BT2=bt2_index_files('BT2_index_hg38.analysisSet', 'index', large=True),
-           BWA=bwa_index_files('BWA_index_hg38.analysisSet', 'index'),
-           BBMAP=bbmap_index_files('BBMap_index_hg38.analysisSet'),
+           bwa=bwa_index_files('BWA_index_hg38.analysisSet', 'index'),
+           bbmap=bbmap_index_files('BBMap_index_hg38.analysisSet'),
            STAR=star_index_files('STAR_index_hg38.analysisSet_knownGene'),
 
 rule build_bowtie1_index:
@@ -108,7 +108,8 @@ rule build_bbmap_index:
     run:
         ensure_empty_dir(params.outdir)
         shell('''
-        {BBMAP:q} ref={input.genome_fa:q} \
+        mkdir -p {params.outdir:q} && \
+          {BBMAP:q} ref={input.genome_fa:q} \
             path={params.outdir:q} \
             t={threads}
         ''')
@@ -122,7 +123,8 @@ rule build_star_index:
     run:
         ensure_empty_dir(params.outdir)
         shell('''
-        STAR --runMode genomeGenerate \
+        mkdir -p {params.outdir:q} && \
+          STAR --runMode genomeGenerate \
             --genomeDir {params.outdir:q} \
             --genomeFastaFiles {input.genome_fa:q} \
             --sjdbGTFfile {input.transcriptome_gff:q} \
