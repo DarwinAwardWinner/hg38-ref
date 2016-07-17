@@ -22,6 +22,13 @@ def bt2_index_files(path, prefix='index', large=True):
               for x in _bt2_index_file_infixes)
     return tuple(os.path.join(path, f) for f in fnames)
 
+_th2_index_suffixes = ('.gff', '.fa', '.fa.tlst', '.fa.ver')
+def th2_index_files(path, prefix='index', large=True):
+    fnames = ('{prefix}{suffix}'.format(prefix=prefix, suffix=s)
+              for s in _bwa_index_suffixes)
+    paths = tuple(os.path.join(path, f) for f in fnames)
+    return paths + bt2_index_files(path, prefix, large)
+
 _bwa_index_suffixes = (
     '.amb',
     '.ann',
@@ -60,12 +67,27 @@ def star_index_files(path):
     '''Return a tuple of all STAR index files for path.'''
     return tuple(os.path.join(path, f) for f in _star_index_filenames)
 
+_salmon_index_filenames = (
+    'hash.bin',
+    'header.json',
+    'kintervals.bin',
+    'rsd.bin',
+    'sa.bin',
+    'txpInfo.bin',
+    'versionInfo.json',
+)
+def salmon_index_files(path):
+    return tuple(os.path.join(path, f) for f in _salmon_index_filenames)
+
+
 rule all_indices:
     input: BT1=bt1_index_files('BT1_index_hg38.analysisSet', 'index', large=True),
            BT2=bt2_index_files('BT2_index_hg38.analysisSet', 'index', large=True),
            bwa=bwa_index_files('BWA_index_hg38.analysisSet', 'index'),
            bbmap=bbmap_index_files('BBMap_index_hg38.analysisSet'),
            STAR=star_index_files('STAR_index_hg38.analysisSet_knownGene'),
+           TH2=th2_index_files('TH2_index_hg38.analysisSet_knownGene', 'index', large=True),
+           salmon=salmon_index_files('Salmon_index_hg38.analysisSet_knownGene'),
 
 rule build_bowtie1_index:
     input: genome_fa='{genome_build}.fa'
@@ -133,4 +155,24 @@ rule build_star_index:
             --runThreadN {threads:q}
         ''')
 
+rule build_tophat2_index:
+    input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff'
+    output: tophat2_index_files('TH2_index_{genome_build}_{transcriptome}', 'index')
+    params: outdir='TH2_index_{genome_build}_{transcriptome}',
+            basename='TH2_index_{genome_build}_{transcriptome}/index',
+    shell: '''
+    tophat2 --GTF {input.transcriptome_gff:q} \
+      --transcriptome-index={wildcards.basename:q} \
+      {input.genome_fa:q}
+    '''
 
+rule build_salmon_index:
+    input: transcriptome_fa='{transcriptome_build}_transcripts.fa'
+    output: salmon_index_files('Salmon_index_{transcriptome_build}')
+    params: outdir='Salmon_index_{transcriptome_build}'
+    shell: '''
+    mkdir -p {params.outdir:q} && \
+      salmon index --transcripts {input.transcriptome_fa:q} \
+        --index {params.outdir:q} --threads {threads:q} \
+        --perfectHash --type quasi
+    '''
