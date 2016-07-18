@@ -32,11 +32,11 @@ def bt2_index_files(path, prefix='index', large=True):
 
 # These are in addition to the bowtie2 files for the same prefix
 _tophat2_index_suffixes = ('.gff', '.fa', '.fa.tlst', '.fa.ver')
-def tophat2_index_files(path, prefix='index', large=True):
+def tophat2_index_files(path, prefix='index'):
     fnames = ('{prefix}{suffix}'.format(prefix=prefix, suffix=s)
               for s in _tophat2_index_suffixes)
     paths = tuple(os.path.join(path, f) for f in fnames)
-    return paths + bt2_index_files(path, prefix, large)
+    return paths + bt2_index_files(path, prefix, large=False)
 
 _bwa_index_suffixes = (
     '.amb',

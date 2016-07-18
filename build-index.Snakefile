@@ -10,7 +10,7 @@ rule all_indices:
            bwa=bwa_index_files('BWA_index_hg38.analysisSet', 'index'),
            bbmap=bbmap_index_files('BBMap_index_hg38.analysisSet'),
            STAR=star_index_files('STAR_index_hg38.analysisSet_knownGene'),
-           TH2=tophat2_index_files('TH2_index_hg38.analysisSet_knownGene', 'index', large=True),
+           TH2=tophat2_index_files('TH2_index_hg38.analysisSet_knownGene', 'index'),
            HISAT2=hisat2_index_files('HISAT2_index_grch38_snp_tran', 'index', large=False),
            salmon=salmon_index_files('Salmon_index_hg38.analysisSet_knownGene'),
 
