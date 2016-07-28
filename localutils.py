@@ -3,6 +3,27 @@
 import os
 import os.path
 import shutil
+import sys
+
+from subprocess import check_output
+
+# TODO: Make this configurable
+BBMAP=os.path.expanduser("~/opt/bbmap/bbmap.sh")
+
+def check_output_decoded(*args, **kwargs):
+    return check_output(*args, **kwargs).decode(sys.getdefaultencoding())
+
+# Determine the versions of various programs used
+CUFFLINKS_VERSION = check_output_decoded('cufflinks 2>&1 | grep "cufflinks v"', shell=True).strip()
+SAMTOOLS_VERSION = check_output_decoded('''samtools 2>&1 | perl -lane 'print "samtools v$1" if m/Version: (.*)/' ''', shell=True).strip()
+BOWTIE1_VERSION = check_output_decoded('bowtie --version | head -n1', shell=True).strip()
+BOWTIE2_VERSION = check_output_decoded('''bowtie2 --version | head -n1 | perl -lane 'print "bowtie2 $1" if m/(version .*)/' ''', shell=True).strip()
+TOPHAT2_VERSION = check_output_decoded('tophat2 --version', shell=True).strip()
+HISAT2_VERSION = check_output_decoded('''hisat2 --version | head -n1 | perl -lane 'print "hisat2 $1" if m/(version .*)/' ''', shell=True).strip()
+BWA_VERSION = check_output_decoded('''bwa 2>&1 | perl -lane 'print "bwa v$1" if m/Version: (.*)/' ''', shell=True).strip()
+BBMAP_VERSION = check_output_decoded('''{BBMAP} --version 2>&1 | grep 'BBMap version' '''.format(BBMAP=BBMAP), shell=True).strip()
+STAR_VERSION = check_output_decoded('STAR --version', shell=True).strip()
+SALMON_VERSION = 'salmon ' + check_output_decoded('salmon --version 2>&1', shell=True).strip()
 
 def ensure_empty_dir(path):
     if os.path.exists(path):
