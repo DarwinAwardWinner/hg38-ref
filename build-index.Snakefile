@@ -72,7 +72,9 @@ rule build_star_index:
           --genomeDir {params.outdir:q} \
           --genomeFastaFiles {input.genome_fa:q} \
           --sjdbGTFfile {input.transcriptome_gff:q} \
-          --sjdbGTFfeatureExon exon --sjdbGTFtagExonParentTranscript Parent \
+          --sjdbGTFfeatureExon exon \
+          --sjdbGTFtagExonParentTranscript Parent \
+          --sjdbGTFtagExonParentGene gene_id \
           --sjdbOverhang 100 \
           --runThreadN {threads:q}
         ''')
