@@ -9,6 +9,7 @@
 /*.fai
 /*.gff
 /*.gtf
+/*.gff3
 
 # HISAT2 index download
 grch38_snp_tran.tar.gz
