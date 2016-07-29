@@ -9,7 +9,7 @@ rule twoBit_to_fasta:
 
 rule gtf_to_gff3:
     input: '{basename}.gtf'
-    output: '{basename}.gff'
+    output: '{basename}.gff3'
     version: CUFFLINKS_VERSION
     shell: 'gffread -FOE {input:q} -o {output:q}'
 
@@ -20,7 +20,7 @@ rule index_fa:
     shell: 'samtools faidx {input:q}'
 
 rule extract_transcript_seqs:
-    input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff',
+    input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff3',
            genome_fai='{genome_build}.fa.fai'
     output: '{genome_build}_{transcriptome}_transcripts.fa'
     version: CUFFLINKS_VERSION

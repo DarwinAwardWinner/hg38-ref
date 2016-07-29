@@ -60,7 +60,7 @@ rule build_bbmap_index:
 
 # TODO: Place the Log file somewhere better than the root
 rule build_star_index:
-    input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff'
+    input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff3'
     output: star_index_files('STAR_index_{genome_build}_{transcriptome}')
     params: outdir='STAR_index_{genome_build}_{transcriptome}'
     threads: 16
@@ -79,7 +79,7 @@ rule build_star_index:
 
 rule build_tophat2_index:
     input: bt2_idx=bt2_index_files('BT2_index_{genome_build}', 'index', large=True),
-           transcriptome_gff='{transcriptome}.gff'
+           transcriptome_gff='{transcriptome}.gff3'
     output: tophat2_index_files('TH2_index_{genome_build}_{transcriptome}', 'index')
     params: outdir='TH2_index_{genome_build}_{transcriptome}',
             bt2_index_basename=os.path.join('BT2_index_{genome_build}', 'index'),
