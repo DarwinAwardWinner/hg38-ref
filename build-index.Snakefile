@@ -61,22 +61,27 @@ rule build_bbmap_index:
 # TODO: Place the Log file somewhere better than the root
 rule build_star_index:
     input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff3'
-    output: star_index_files('STAR_index_{genome_build}_{transcriptome}')
+    output: index_files=star_index_files('STAR_index_{genome_build}_{transcriptome}'),
+            log_file='STAR_index_{genome_build}_{transcriptome}/Log.out'
     params: outdir='STAR_index_{genome_build}_{transcriptome}'
     threads: 16
     version: STAR_VERSION
     run:
         ensure_empty_dir(params.outdir)
+        # This is to run STAR from the index's subdirectory to ensure
+        # that the log file is produced there.
+        basedir = os.path.abspath(os.path.curdir)
         shell('''
-        STAR --runMode genomeGenerate \
-          --genomeDir {params.outdir:q} \
-          --genomeFastaFiles {input.genome_fa:q} \
-          --sjdbGTFfile {input.transcriptome_gff:q} \
-          --sjdbGTFfeatureExon exon \
-          --sjdbGTFtagExonParentTranscript Parent \
-          --sjdbGTFtagExonParentGene gene_id \
-          --sjdbOverhang 100 \
-          --runThreadN {threads:q}
+        cd {params.outdir:q} && \
+          STAR --runMode genomeGenerate \
+            --genomeDir ./ \
+            --genomeFastaFiles {basedir:q}/{input.genome_fa:q} \
+            --sjdbGTFfile {basedir:q}/{input.transcriptome_gff:q} \
+            --sjdbGTFfeatureExon exon \
+            --sjdbGTFtagExonParentTranscript Parent \
+            --sjdbGTFtagExonParentGene gene_id \
+            --sjdbOverhang 100 \
+            --runThreadN {threads:q}
         ''')
 
 rule build_tophat2_index:
