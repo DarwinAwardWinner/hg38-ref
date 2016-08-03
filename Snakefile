@@ -1,8 +1,9 @@
 from localutils import *
 
-include: "download.Snakefile"
-include: "convert.Snakefile"
-include: "build-index.Snakefile"
+include: 'download.Snakefile'
+include: 'convert.Snakefile'
+include: 'build-index.Snakefile'
+include: 'rulegraph.Snakefile'
 
 rule all:
     input: BT1=bt1_index_files('BT1_index_hg38.analysisSet', 'index', large=True),
@@ -16,11 +17,3 @@ rule all:
            STAR_gen25=star_index_files('STAR_index_hg38.analysisSet_gencode.v25'),
            tophat2_gen25=tophat2_index_files('TH2_index_hg38.analysisSet_gencode.v25', 'index'),
            salmon_gen25=salmon_index_files('Salmon_index_hg38.analysisSet_gencode.v25'),
-
-rule dag_svg:
-    output: 'dag-{target}.svg'
-    shell: '''snakemake --nolock -f --dag {wildcards.target:q} | dot -Tsvg > {output:q}'''
-
-rule rulegraph_svg:
-    output: 'rulegraph-{target}.svg'
-    shell: '''snakemake --nolock -f --rulegraph {wildcards.target:q} | dot -Tsvg > {output:q}'''
