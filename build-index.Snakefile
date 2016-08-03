@@ -91,11 +91,14 @@ rule build_tophat2_index:
     params: outdir='TH2_index_{genome_build}_{transcriptome}',
             bt2_index_basename=os.path.join('BT2_index_{genome_build}', 'index'),
             basename='TH2_index_{genome_build}_{transcriptome}/index',
+    # Can tophat do parallel building of a transcriptome index?
+    threads: 1
     version: TOPHAT2_VERSION
     run:
         ensure_empty_dir(params.outdir)
         shell('''
         tophat2 --GTF {input.transcriptome_gff:q} \
+          --output-dir={params.outdir:q} \
           --transcriptome-index={params.basename:q} \
           {params.bt2_index_basename:q}
         ''')
