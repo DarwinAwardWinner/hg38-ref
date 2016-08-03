@@ -1,7 +1,9 @@
 This is a [Snakemake][1] workflow for downloading the hg38 genome &
 transcriptome and building indices for various alignment and mapping
 tools, in a completely automated fashion. I will be adding more parts
-to the workflow as I require them.
+to the workflow as I require them. Currently the dependency graph looks like this:
+
+![Rule Graph](rulegraph-all.svg "Rule graph for building all genome indices")
 
 If you wanted to publish a reproducible workflow that involves
 aligning to hg38, you could conceivably include this repo as a
