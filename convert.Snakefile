@@ -39,5 +39,5 @@ rule fix_gencode_annot_chrom_ids:
         r['source']("scripts/map-gff-chrom.R")
         mapping = r['read.chrom.mapping'](input.mapping)
         gr = r['import'](input.gff, format="GFF3")
-        fixed_gr = r['map.seqlevels'](gr, mapping)
+        fixed_gr = r['map.seqlevels'](gr, mapping, keep_unmatched=False)
         r['export'](fixed_gr, output.gff, format="GFF3")
