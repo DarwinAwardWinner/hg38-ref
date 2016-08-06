@@ -60,3 +60,20 @@ rule fix_gencode_annot_chrom_ids:
                         continue
                     line = '\t'.join(fields)
                 outfile.write(line + '\n')
+
+rule make_gencode_txdb:
+    input: gff='gencode.v{release}.gff3'
+    output: dbfile='gencode.v{release}.txdb.sqlite3'
+    version: BIOC_VERSION
+    run:
+        human_taxid = '9606'
+        from rpy2.robjects import r
+        r('''suppressMessages({
+        library(rtracklayer)
+        library(GenomicFeatures)
+        library(BSgenome.Hsapiens.UCSC.hg38)
+        })''')
+        gff = r['import'](input.gff, format='GFF3')
+        gff.slots['seqinfo'] = r('seqinfo(BSgenome.Hsapiens.UCSC.hg38)')
+        txdb = r['makeTxDbFromGRanges'](gff, taxonomyId=human_taxid)
+        r['saveDb'](txdb, output.dbfile)
