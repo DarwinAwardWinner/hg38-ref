@@ -13,3 +13,4 @@
 
 # HISAT2 index download
 grch38_snp_tran.tar.gz
+/chrom_mapping_*
