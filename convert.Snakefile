@@ -66,8 +66,20 @@ rule make_gencode_txdb:
     output: dbfile='gencode.v{release}.txdb.sqlite3'
     version: BIOC_VERSION
     run:
-        human_taxid = '9606'
         from rpy2.robjects import r
+        from rpy2.rinterface import StrSexpVector
+        txdb_meta = {
+            'TaxID': '9606',
+            'Data source': 'Gencode',
+            'Gencode Release': wildcards.release,
+            'Resource URL': 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/',
+            'Type of Gene ID': 'Ensembl Gene ID',
+        }
+        txdb_meta_df = r['data.frame'](
+            name=StrSexpVector(list(txdb_meta.keys())),
+            value=StrSexpVector(list(txdb_meta.values())),
+            stringsAsFactors=False,
+        )
         r('''suppressMessages({
         library(rtracklayer)
         library(GenomicFeatures)
@@ -75,5 +87,8 @@ rule make_gencode_txdb:
         })''')
         gff = r['import'](input.gff, format='GFF3')
         gff.slots['seqinfo'] = r('seqinfo(BSgenome.Hsapiens.UCSC.hg38)')
-        txdb = r['makeTxDbFromGRanges'](gff, taxonomyId=human_taxid)
+        txdb = r['makeTxDbFromGRanges'](
+            gr=gff, taxonomyId=txdb_meta['TaxID'],
+            metadata=txdb_meta_df,
+        )
         r['saveDb'](txdb, output.dbfile)
