@@ -1,6 +1,7 @@
 '''Generic rules for converting between file types.'''
 
 from localutils import *
+from tool_versions import *
 
 rule twoBit_to_fasta:
     input: '{basename}.2bit'
