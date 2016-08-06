@@ -1,6 +1,6 @@
 '''Generic rules for converting between file types.'''
 
-from rpy2.robjects import r
+from atomicwrites import atomic_write
 
 from localutils import *
 from tool_versions import *
@@ -34,10 +34,29 @@ rule extract_transcript_seqs:
 rule fix_gencode_annot_chrom_ids:
     input: gff='gencode.v{release}_raw.gff3', mapping='chrom_mapping_GRCh38_gencode2UCSC.txt'
     output: gff='gencode.v{release,\\d+}.gff3'
-    version: BIOC_VERSION
     run:
-        r['source']("scripts/map-gff-chrom.R")
-        mapping = r['read.chrom.mapping'](input.mapping)
-        gr = r['import'](input.gff, format="GFF3")
-        fixed_gr = r['map.seqlevels'](gr, mapping, keep_unmatched=False)
-        r['export'](fixed_gr, output.gff, format="GFF3")
+        mapping = read_chrom_mapping(input.mapping)
+        with open(input.gff, "r") as infile, \
+             atomic_write(output.gff, overwrite=True) as outfile:
+            for line in infile:
+                line = line.strip('\n')
+                # Line indicating chromosome length: chr is 2nd field.
+                if line.startswith('##sequence-region'):
+                    fields = line.split()
+                    try:
+                        fields[1] = mapping[fields[1]]
+                    except KeyError:
+                        continue
+                    line = ' '.join(fields)
+                # Regular comment: pass through unchanged
+                elif line.startswith('#'):
+                    pass
+                # Normal GFF line: chr is 1st field
+                else:
+                    fields = line.split('\t')
+                    try:
+                        fields[0] = mapping[fields[0]]
+                    except KeyError:
+                        continue
+                    line = '\t'.join(fields)
+                outfile.write(line + '\n')

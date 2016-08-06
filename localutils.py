@@ -18,6 +18,16 @@ def ensure_empty_dir(path):
         shutil.rmtree(path)
     os.makedirs(path)
 
+def read_chrom_mapping(filename):
+    mapping = {}
+    with open(filename, "r") as infile:
+        for line in infile:
+            (from_id, to_id) = line.split("\t")
+            to_id = to_id.strip()
+            if to_id:
+                mapping[from_id] = to_id
+    return mapping
+
 # Series of functions for listing the expected index files of various
 # aligner tools
 
