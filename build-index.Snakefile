@@ -3,6 +3,7 @@
 import os.path
 
 from localutils import *
+from tool_versions import *
 
 rule all_indices:
     input: BT1=bt1_index_files('BT1_index_hg38.analysisSet', 'index', large=True),

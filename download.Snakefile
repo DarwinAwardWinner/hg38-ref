@@ -22,5 +22,10 @@ rule get_hisat2_index_tar:
 
 rule get_gencode_annotation_gff:
     input: FTP.remote('ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_{release}/gencode.v{release}.chr_patch_hapl_scaff.annotation.gff3.gz', static=True)
-    output: 'gencode.v{release}.gff3'
+    output: 'gencode.v{release}_raw.gff3'
     shell: 'zcat {input:q} > {output:q}'
+
+# rule get_chrom_mapping:
+#     input:
+#     output:
+#
