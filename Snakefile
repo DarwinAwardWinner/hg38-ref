@@ -17,4 +17,4 @@ rule all:
            STAR_gen25=star_index_files('STAR_index_hg38.analysisSet_gencode.v25'),
            tophat2_gen25=tophat2_index_files('TH2_index_hg38.analysisSet_gencode.v25', 'index'),
            salmon_gen25=salmon_index_files('Salmon_index_hg38.analysisSet_gencode.v25'),
-           gencode_txdb="gencode.v25.txdb.sqlite3"
+           gencode_txdb='TxDb.Hsapiens.Gencode.hg38.v25.sqlite3'

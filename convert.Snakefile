@@ -63,7 +63,7 @@ rule fix_gencode_annot_chrom_ids:
 
 rule make_gencode_txdb:
     input: gff='gencode.v{release}.gff3'
-    output: dbfile='gencode.v{release}.txdb.sqlite3'
+    output: dbfile='TxDb.Hsapiens.Gencode.hg38.v{release}.sqlite3'
     version: BIOC_VERSION
     run:
         from rpy2.robjects import r
