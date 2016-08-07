@@ -85,8 +85,9 @@ rule make_gencode_txdb:
         library(GenomicFeatures)
         library(BSgenome.Hsapiens.UCSC.hg38)
         })''')
+        seqinfo = r('seqinfo(BSgenome.Hsapiens.UCSC.hg38)')
         gff = r['import'](input.gff, format='GFF3')
-        gff.slots['seqinfo'] = r('seqinfo(BSgenome.Hsapiens.UCSC.hg38)')
+        gff = r['seqinfo<-'](gff, seqinfo)
         txdb = r['makeTxDbFromGRanges'](
             gr=gff, taxonomyId=txdb_meta['TaxID'],
             metadata=txdb_meta_df,
