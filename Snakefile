@@ -1,5 +1,8 @@
 from localutils import *
 
+from snakemake.utils import min_version
+min_version("3.7.1")
+
 include: 'download.Snakefile'
 include: 'convert.Snakefile'
 include: 'build-index.Snakefile'
