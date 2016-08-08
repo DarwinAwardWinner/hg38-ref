@@ -3,6 +3,10 @@
 # Aligner index directories
 /*_index_*/
 
+# HISAT2 index download
+grch38_snp_tran.tar.gz
+/chrom_mapping_*
+
 # Various data file types
 /*.2bit
 /*.fa
@@ -10,7 +14,6 @@
 /*.gff
 /*.gtf
 /*.gff3
+*.sqlite3
 
-# HISAT2 index download
-grch38_snp_tran.tar.gz
-/chrom_mapping_*
+# Other
