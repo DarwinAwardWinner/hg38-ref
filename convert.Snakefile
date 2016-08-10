@@ -67,6 +67,7 @@ rule make_gencode_txdb:
     version: BIOC_VERSION
     run:
         from rpy2.robjects import r
+        from rpy2.robjects import globalenv as r_env
         from rpy2.rinterface import StrSexpVector
         txdb_meta = {
             'TaxID': '9606',
@@ -80,16 +81,24 @@ rule make_gencode_txdb:
             value=StrSexpVector(list(txdb_meta.values())),
             stringsAsFactors=False,
         )
-        r('''suppressMessages({
-        library(rtracklayer)
-        library(GenomicFeatures)
-        library(BSgenome.Hsapiens.UCSC.hg38)
-        })''')
-        seqinfo = r('seqinfo(BSgenome.Hsapiens.UCSC.hg38)')
-        gff = r['import'](input.gff, format='GFF3')
-        gff = r['seqinfo<-'](gff, seqinfo)
-        txdb = r['makeTxDbFromGRanges'](
-            gr=gff, taxonomyId=txdb_meta['TaxID'],
-            metadata=txdb_meta_df,
-        )
-        r['saveDb'](txdb, output.dbfile)
+        r_env['txdb.meta'] = txdb_meta_df
+        r_env['taxid'] = txdb_meta['TaxID']
+        r_env['input.gff'] = input.gff
+        r_env['output.dbfile'] = output.dbfile
+        r('''
+        suppressMessages({
+            library(rtracklayer)
+            library(GenomicFeatures)
+            library(BSgenome.Hsapiens.UCSC.hg38)
+            library(stringr)
+            library(magrittr)
+        })
+        gff <- import(input.gff, format='GFF3')
+        seqlevels(gff) <- seqlevels(BSgenome.Hsapiens.UCSC.hg38)
+        seqinfo(gff) <- seqinfo(BSgenome.Hsapiens.UCSC.hg38)
+        # Remove the version number from the end of the IDs
+        mcols(gff)[c("ID", "Parent", "gene_id", "transcript_id", "exon_id", "protein_id")] %<>%
+            lapply(. %>% str_replace("\\\\.[0-9]+", ""))
+        txdb <- makeTxDbFromGRanges(gff, taxonomyId=taxid, metadata=txdb.meta)
+        saveDb(txdb, output.dbfile)
+        ''')
