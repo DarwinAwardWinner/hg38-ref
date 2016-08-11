@@ -5,6 +5,7 @@ min_version("3.7.1")
 
 include: 'download.Snakefile'
 include: 'convert.Snakefile'
+include: 'build-annot.Snakefile'
 include: 'build-index.Snakefile'
 include: 'rulegraph.Snakefile'
 
