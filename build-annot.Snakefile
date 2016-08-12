@@ -69,11 +69,11 @@ rule make_ensembl_txdb:
             library(BSgenome.Hsapiens.UCSC.hg38)
         })
         source("scripts/map-gff-chrom.R")
+        chrom.mapping <- read.chrom.mapping(chrom.mapping.file)
         txdb <- makeTxDbFromBiomart(
             biomart="ENSEMBL_MART_ENSEMBL",
             dataset="hsapiens_gene_ensembl",
-            host=ensembl.host)
-        chrom.mapping <- read.chrom.mapping(chrom.mapping.file)
-        txdb <- map.seqlevels(txdb, chrom.mapping)
+            host=ensembl.host,
+            chrom.mapping=chrom.mapping)
         saveDb(txdb, output.dbfile)
         ''')
