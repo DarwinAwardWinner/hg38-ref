@@ -21,6 +21,8 @@ map.seqlevels <- function(gr, new_seqlevels, keep_unmatched=FALSE) {
     return(gr)
 }
 
+## Modified version that allows renaming chromosomes before building
+## the TxDb
 makeTxDbFromBiomart <- function (biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl",
     transcript_ids = NULL, circ_seqs = DEFAULT_CIRC_SEQS, filter = NULL,
     id_prefix = "ensembl_", host = "www.ensembl.org", port = 80,

@@ -4,8 +4,8 @@ from localutils import *
 from tool_versions import *
 
 rule make_gencode_txdb:
-    input: gff='gencode.v{release}.gff3'
-    output: dbfile='TxDb.Hsapiens.Gencode.hg38.v{release}.sqlite3'
+    input: gff='gencode.v{release}.gff3',
+    output: dbfile='TxDb.Hsapiens.Gencode.hg38.v{release}.sqlite3',
     version: BIOC_VERSION
     run:
         import rpy2.rinterface
@@ -50,17 +50,18 @@ rule make_gencode_txdb:
 rule make_ensembl_txdb:
     input: mapping='chrom_mapping_GRCh38_ensembl2UCSC.txt'
     output: dbfile='TxDb.Hsapiens.Ensembl.hg38.v{release}.sqlite3'
+    params: ensembl_host='e{release}.ensembl.org'
+    version: BIOC_VERSION
     run:
         release = int(wildcards.release)
         if release < 76:
             raise ValueError('Only Ensembl releases 76 and higher are built on hg38')
-        host = 'e{release}.ensembl.org'.format(release=release)
         from rpy2.robjects import r
         from rpy2.robjects import globalenv as r_env
         import rpy2.rinterface
         rpy2.rinterface.set_writeconsole_warnerror(lambda x: sys.stderr.write(x))
         r_env['chrom.mapping.file'] = input.mapping
-        r_env['ensembl.host'] = host
+        r_env['ensembl.host'] = params.ensembl_host
         r_env['output.dbfile'] = output.dbfile
         r('''
         suppressMessages({
@@ -76,4 +77,41 @@ rule make_ensembl_txdb:
             host=ensembl.host,
             chrom.mapping=chrom.mapping)
         saveDb(txdb, output.dbfile)
+        ''')
+
+rule make_ensembl_genemeta:
+    output: datafile='genemeta.ensembl.v{release}.RDS'
+    params: ensembl_host='e{release}.ensembl.org'
+    version: BIOC_VERSION
+    run:
+        from rpy2.robjects import r
+        from rpy2.robjects import globalenv as r_env
+        import rpy2.rinterface
+        rpy2.rinterface.set_writeconsole_warnerror(lambda x: sys.stderr.write(x))
+        r_env['output.datafile'] = output.datafile
+        r_env['ensembl.host'] = params.ensembl_host
+        r('''
+        source("scripts/build-annot.R")
+        annot <- build.annot.from.biomart(host=ensembl.host, keytype="ENSEMBL")
+        saveRDS(annot, output.datafile)
+        ''')
+
+rule make_orgdb_genemeta:
+    output: datafile='genemeta.org.{name}.db.RDS'
+    params: orgdbname='org.{name}.db'
+    # Are orgdb packages versioned independently of BioC?
+    version: BIOC_VERSION
+    run:
+        from rpy2.robjects import r
+        from rpy2.robjects import globalenv as r_env
+        import rpy2.rinterface
+        rpy2.rinterface.set_writeconsole_warnerror(lambda x: sys.stderr.write(x))
+        r_env['output.datafile'] = output.datafile
+        r_env['orgdbname'] = params.orgdbname
+        r('''
+        source("scripts/build-annot.R")
+        library(orgdbname, character.only=TRUE)
+        orgdb <- get(orgdbname)
+        annot <- build.annot.from.orgdb(orgdb, keytype="ENTREZID")
+        saveRDS(annot, output.datafile)
         ''')
