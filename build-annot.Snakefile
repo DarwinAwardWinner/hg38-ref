@@ -5,7 +5,7 @@ from tool_versions import *
 
 rule make_gencode_txdb:
     input: gff='gencode.v{release}.gff3',
-    output: dbfile='TxDb.Hsapiens.Gencode.hg38.v{release}.sqlite3',
+    output: dbfile='TxDb.Hsapiens.gencode.hg38.v{release}.sqlite3',
     version: BIOC_VERSION
     run:
         import rpy2.rinterface
@@ -49,7 +49,7 @@ rule make_gencode_txdb:
 
 rule make_ensembl_txdb:
     input: mapping='chrom_mapping_GRCh38_ensembl2UCSC.txt'
-    output: dbfile='TxDb.Hsapiens.Ensembl.hg38.v{release}.sqlite3'
+    output: dbfile='TxDb.Hsapiens.ensembl.hg38.v{release}.sqlite3'
     params: ensembl_host='e{release}.ensembl.org'
     version: BIOC_VERSION
     run:
