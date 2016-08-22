@@ -20,6 +20,11 @@ rule get_gencode_annotation_gff:
     output: 'gencode.v{release,\\d+}_raw.gff3'
     shell: 'zcat < {input:q} > {output:q}'
 
+rule get_ensembl_annotation_gff:
+    input: FTP.remote('ftp.ensembl.org/pub/release-{release}/gff3/homo_sapiens/Homo_sapiens.GRCh38.{release}.chr_patch_hapl_scaff.gff3.gz', static=True)
+    output: 'ensembl.{release,\\d+}_raw.gff3'
+    shell: 'zcat < {input:q} > {output:q}'
+
 rule get_chrom_mapping:
     input: HTTP.remote('raw.githubusercontent.com/dpryan79/ChromosomeMappings/master/{genome_build}_{from_ids}2{to_ids}.txt', static=True)
     output: 'chrom_mapping_{genome_build}_{from_ids}2{to_ids}.txt'
