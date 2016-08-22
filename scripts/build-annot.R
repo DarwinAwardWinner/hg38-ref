@@ -19,11 +19,17 @@ build.annot.from.orgdb <- function(orgdb, keytype=c("ENTREZID", "SYMBOL", "UNIGE
                                    keytype=keytype, multiVals="CharacterList")
     })
     for (i in names(gene.annot)) {
-        ids <- gene.annot[[i]]
-        if (all(lengths(ids) <= 1)) {
-            ids[lengths(ids) == 0] <- NA
-            assert_that(all(lengths(ids) == 1))
-            gene.annot[[i]] <- unlist(ids)
+        vals <- gene.annot[[i]]
+        if (all(lengths(vals) <= 1)) {
+            ## Single-value column: fill in empty values with NA, then
+            ## unlist
+            vals[lengths(vals) == 0] <- NA
+            assert_that(all(lengths(vals) == 1))
+            gene.annot[[i]] <- unlist(vals)
+        } else {
+            ## Multi-value column: Remove NA values
+            vals %<>% endoapply(na.omit)
+            gene.annot[[i]] <- vals
         }
     }
     return(gene.annot)
@@ -59,14 +65,16 @@ build.annot.from.biomart <-
             {List(split(as.character(.[[2]]), .[[1]]))} %>%
             .[! (. == "" | is.na(.)) ]
         if (all(lengths(bm) <= 1)) {
+            ## Single-value column: fill in empty values with NA, then
+            ## unlist
             bm[lengths(bm) == 0] <- NA
             assert_that(all(lengths(bm) == 1))
             bm <-  unlist(bm)
         } else {
+            ## Multi-value column: fill in missing IDs with empty vector
             missing.ens <- setdiff(gene.annot$ENSEMBL, names(bm))
             missing.ids <- List(character(0)) %>% rep(length(missing.ens)) %>% setNames(missing.ens)
             bm %<>% c(missing.ids)
-
         }
         gene.annot[[metacols[i]]] <- bm[gene.annot$ENSEMBL]
     }
