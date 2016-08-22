@@ -80,7 +80,7 @@ rule make_ensembl_txdb:
         ''')
 
 rule make_ensembl_genemeta:
-    output: datafile='genemeta.ensembl.v{release}.RDS'
+    output: datafile='genemeta.ensembl.{release}.RDS'
     params: ensembl_host='e{release}.ensembl.org'
     version: BIOC_VERSION
     run:
