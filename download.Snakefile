@@ -20,6 +20,7 @@ rule get_gencode_annotation_gff:
     output: 'gencode.v{release,\\d+}_raw.gff3'
     shell: 'zcat < {input:q} > {output:q}'
 
+# http://uswest.ensembl.org/info/data/ftp/index.html
 rule get_ensembl_annotation_gff:
     input: FTP.remote('ftp.ensembl.org/pub/release-{release}/gff3/homo_sapiens/Homo_sapiens.GRCh38.{release}.chr_patch_hapl_scaff.gff3.gz', static=True)
     output: 'ensembl.{release,\\d+}_raw.gff3'

@@ -18,7 +18,7 @@ rule all:
            STAR_kg=star_index_files('STAR_index_hg38.analysisSet_knownGene'),
            tophat2_kg=tophat2_index_files('TH2_index_hg38.analysisSet_knownGene', 'index'),
            salmon_kg=salmon_index_files('Salmon_index_hg38.analysisSet_knownGene'),
-           salmon_genemap_kg='Salmon_genemap_hg38.analysisSet_knownGene/genemap.txt',
+           salmon_genemap_kg='Salmon_index_hg38.analysisSet_knownGene/genemap.txt',
            STAR_ens85=star_index_files('STAR_index_hg38.analysisSet_ensembl.85'),
            tophat2_ens85=tophat2_index_files('TH2_index_hg38.analysisSet_ensembl.85', 'index'),
            salmon_ens85=salmon_index_files('Salmon_index_hg38.analysisSet_ensembl.85'),

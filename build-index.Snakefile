@@ -134,7 +134,7 @@ rule build_salmon_index:
 # Salmon genemap files, required to get gene-level quantification
 # results
 rule make_salmon_genemap_from_knownGene:
-    output: 'Salmon_genemap_hg38.analysisSet_knownGene/genemap.txt'
+    output: 'Salmon_index_hg38.analysisSet_knownGene/genemap.txt'
     run:
         from rpy2.robjects import r
         from rpy2.robjects import globalenv as r_env
