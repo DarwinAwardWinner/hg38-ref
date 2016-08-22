@@ -98,14 +98,31 @@ def star_index_files(path):
 _salmon_index_filenames = (
     'hash.bin',
     'header.json',
-    'kintervals.bin',
+    'indexing.log',
+    'quasi_index.log',
     'rsd.bin',
     'sa.bin',
     'txpInfo.bin',
     'versionInfo.json',
 )
-def salmon_index_files(path):
-    return tuple(os.path.join(path, f) for f in _salmon_index_filenames)
+# salmon index --perfectHash
+_salmon_perfectHash_index_filenames = (
+    'hash_info.bph',
+    'hash_info.val',
+    'header.json',
+    'indexing.log',
+    'quasi_index.log',
+    'rsd.bin',
+    'sa.bin',
+    'txpInfo.bin',
+    'versionInfo.json',
+)
+
+def salmon_index_files(path, perfectHash=False):
+    if perfectHash:
+        return tuple(os.path.join(path, f) for f in _salmon_perfectHash_index_filenames)
+    else:
+        return tuple(os.path.join(path, f) for f in _salmon_index_filenames)
 
 _hisat2_index_file_infixes = tuple(map(str, range(1,9)))
 def hisat2_index_files(path, prefix='index', large=False):

@@ -120,8 +120,9 @@ rule unpack_hisat2_index:
 
 rule build_salmon_index:
     input: transcriptome_fa='{transcriptome_build}_transcripts.fa'
-    output: salmon_index_files('Salmon_index_{transcriptome_build}')
+    output: salmon_index_files('Salmon_index_{transcriptome_build}', perfectHash=True)
     params: outdir='Salmon_index_{transcriptome_build}'
+    threads: 8
     version: SALMON_VERSION
     run:
         ensure_empty_dir(params.outdir)
