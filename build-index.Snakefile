@@ -130,3 +130,38 @@ rule build_salmon_index:
           --index {params.outdir:q} --threads {threads:q} \
           --perfectHash --type quasi
         ''')
+
+# Salmon genemap files, required to get gene-level quantification
+# results
+rule make_salmon_genemap_from_knownGene:
+    output: 'Salmon_genemap_hg38.analysisSet_knownGene/genemap.txt'
+    run:
+        from rpy2.robjects import r
+        from rpy2.robjects import globalenv as r_env
+        import rpy2.rinterface
+        rpy2.rinterface.set_writeconsole_warnerror(lambda x: sys.stderr.write(x))
+        r_env['outfile'] = output[0]
+        r('''
+        library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+        txg <- transcriptsBy(TxDb.Hsapiens.UCSC.hg38.knownGene, 'gene')
+        txg_df <- data.frame(TXID=unlist(txg)$tx_name, GeneID=rep(names(txg), lengths(txg)))
+        write.table(txg_df, outfile, sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
+        ''')
+
+rule make_salmon_genemap_from_ensembl:
+    input: txdb='TxDb.Hsapiens.ensembl.hg38.v{release}.sqlite3'
+    output: 'Salmon_index_hg38.analysisSet_ensembl.{release}/genemap.txt'
+    run:
+        from rpy2.robjects import r
+        from rpy2.robjects import globalenv as r_env
+        import rpy2.rinterface
+        rpy2.rinterface.set_writeconsole_warnerror(lambda x: sys.stderr.write(x))
+        r_env['input.txdb'] = input.txdb
+        r_env['outfile'] = output[0]
+        r('''
+        library(GenomicFeatures)
+        txdb <- loadDb(input.txdb)
+        txg <- transcriptsBy(txdb, 'gene')
+        txg_df <- data.frame(TXID=unlist(txg)$tx_name, GeneID=rep(names(txg), lengths(txg)))
+        write.table(txg_df, outfile, sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
+        ''')
