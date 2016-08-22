@@ -28,7 +28,10 @@ rule extract_transcript_seqs:
            genome_fai='{genome_build}.fa.fai'
     output: '{genome_build}_{transcriptome}_transcripts.fa'
     version: CUFFLINKS_VERSION
-    shell: 'gffread -w {output:q} -g {input.genome_fa:q} {input.transcriptome_gff:q} 2>/dev/null'
+    shell: '''
+    gffread -w /dev/stdout -g {input.genome_fa:q} {input.transcriptome_gff:q} 2>/dev/null | \
+      sed -e 's/^>transcript:/>/' > {output:q}
+    '''
 
 # Convert GENCODE annotation from GENCODE to UCSC
 rule fix_gencode_annot_chrom_ids:
