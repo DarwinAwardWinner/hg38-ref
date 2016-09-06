@@ -101,6 +101,11 @@ except Exception:
     SALMON_VERSION = None
 
 try:
+    KALLISTO_VERSION = 'kallisto ' + get_command_version_string('kallisto', '^kallisto\\s+(?P<version>\\S+)')
+except Exception:
+    KALLISTO_VERSION = None
+
+try:
     from rpy2.robjects import r
     from rpy2.rinterface import RRuntimeError
     R_VERSION = ''.join(r('R.version$version.string'))

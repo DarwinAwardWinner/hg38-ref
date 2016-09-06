@@ -166,3 +166,10 @@ rule make_salmon_genemap_from_ensembl:
         txg_df <- data.frame(TXID=unlist(txg)$tx_name, GeneID=rep(names(txg), lengths(txg)))
         write.table(txg_df, outfile, sep="\t", quote=FALSE, row.names=FALSE, col.names=FALSE)
         ''')
+
+rule build_kallisto_index:
+    input: transcriptome_fa='{transcriptome_build}_transcripts.fa'
+    output: index_file='Kallisto_index_{transcriptome_build}'
+    threads: 1
+    version: KALLISTO_VERSION
+    shell: 'kallisto index -i {output.index_file:q} --make-unique {input.transcriptome_fa:q}'
