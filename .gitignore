@@ -18,3 +18,4 @@ grch38_snp_tran.tar.gz
 
 # Other
 *.RDS
+*.bedtools.genome

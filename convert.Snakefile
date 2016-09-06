@@ -23,6 +23,11 @@ rule index_fa:
     version: SAMTOOLS_VERSION
     shell: 'samtools faidx {input:q}'
 
+rule fai_to_bedtools_genome_file:
+    input: '{basename}.fa.fai'
+    output: '{basename}.bedtools.genome'
+    shell: '''cat {input:q} | cut -f1,2 > {output:q}'''
+
 rule extract_transcript_seqs:
     input: genome_fa='{genome_build}.fa', transcriptome_gff='{transcriptome}.gff3',
            genome_fai='{genome_build}.fa.fai'
