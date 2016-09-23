@@ -2,8 +2,8 @@
 
 from atomicwrites import atomic_write
 
-from localutils import *
-from tool_versions import *
+exec(open("localutils.py").read())
+exec(open("tool_versions.py").read())
 
 rule twoBit_to_fasta:
     input: '{basename}.2bit'

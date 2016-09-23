@@ -1,7 +1,7 @@
 '''Rules for creating various annotation file formats'''
 
-from localutils import *
-from tool_versions import *
+exec(open("localutils.py").read())
+exec(open("tool_versions.py").read())
 
 rule make_gencode_txdb:
     input: gff='gencode.v{release}.gff3',
