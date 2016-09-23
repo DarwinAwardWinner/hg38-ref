@@ -25,7 +25,7 @@ rule index_fa:
 
 rule fai_to_bedtools_genome_file:
     input: '{basename}.fa.fai'
-    output: '{basename}.bedtools.genome'
+    output: '{basename}.chrom.sizes'
     shell: '''cat {input:q} | cut -f1,2 > {output:q}'''
 
 rule extract_transcript_seqs:
