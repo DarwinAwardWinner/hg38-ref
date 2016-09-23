@@ -1,7 +1,7 @@
 .snakemake
 
 # Aligner index directories
-/*_index_*/
+/*_index_*
 
 # HISAT2 index download
 grch38_snp_tran.tar.gz
