@@ -2,8 +2,8 @@
 
 import os.path
 
-exec(open("localutils.py").read())
-exec(open("tool_versions.py").read())
+include: 'localutils.py'
+include: 'tool_versions.py'
 
 rule all_indices:
     input: BT1=bt1_index_files('BT1_index_hg38.analysisSet', 'index', large=True),

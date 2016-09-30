@@ -1,7 +1,7 @@
 '''Rules for creating various annotation file formats'''
 
-exec(open("localutils.py").read())
-exec(open("tool_versions.py").read())
+include: 'localutils.py'
+include: 'tool_versions.py'
 
 rule make_gencode_txdb:
     input: gff='gencode.v{release}.gff3',
