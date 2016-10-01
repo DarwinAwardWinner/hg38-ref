@@ -9,6 +9,8 @@ include: 'build-annot.Snakefile'
 include: 'build-index.Snakefile'
 include: 'rulegraph.Snakefile'
 
+shell.executable("bash")
+
 rule all:
     input: BT1=bt1_index_files('BT1_index_hg38.analysisSet', 'index', large=True),
            BT2=bt2_index_files('BT2_index_hg38.analysisSet', 'index', large=True),
