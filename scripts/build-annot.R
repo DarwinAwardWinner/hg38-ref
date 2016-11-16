@@ -1,6 +1,7 @@
 suppressMessages({
   library(magrittr)
   library(assertthat)
+  library(biomaRt)
 })
 
 build.annot.from.orgdb <- function(orgdb, keytype=c("ENTREZID", "SYMBOL", "UNIGENE")) {
@@ -15,8 +16,8 @@ build.annot.from.orgdb <- function(orgdb, keytype=c("ENTREZID", "SYMBOL", "UNIGE
     gene.annot <- DataFrame(row.names=allkeys, setNames(list(allkeys), keytype))
     suppressMessages({
         gene.annot[metacols] <- lapply(metacols, mapIds, x=orgdb,
-                                   keys=gene.annot[[keytype]],
-                                   keytype=keytype, multiVals="CharacterList")
+                                       keys=gene.annot[[keytype]],
+                                       keytype=keytype, multiVals="CharacterList")
     })
     for (i in names(gene.annot)) {
         vals <- gene.annot[[i]]
@@ -32,6 +33,18 @@ build.annot.from.orgdb <- function(orgdb, keytype=c("ENTREZID", "SYMBOL", "UNIGE
             gene.annot[[i]] <- vals
         }
     }
+
+    annot.meta <- metadata(orgdb) %$%
+        setNames(value, name) %>%
+        .[names(.) %in%
+          c("ORGANISM", "SPECIES", "EGSOURCEDATE", "EGSOURCENAME",
+            "EGSOURCEURL", "TAXID", "ENSOURCEDATE", "ENSOURCENAME",
+            "ENSOURCEURL", "UPSOURCENAME", "UPSOURCEURL",
+            "UPSOURCEDATE")] %>% as.list
+    annot.meta$KEYTYPE <- keytype
+    annot.meta$PACKAGE <- orgdb$packageName
+    metadata(gene.annot) %<>% c(annot.meta)
+
     return(gene.annot)
 }
 
@@ -41,10 +54,9 @@ build.annot.from.biomart <-
              mart=useEnsembl(biomart="ensembl", host=host,
                              dataset="hsapiens_gene_ensembl"))
 {
-    library(biomaRt)
 
-    ## Names: Biomart attr name;
-    ## Values: corresponding data frame colname
+    ## Name: Biomart attr name;
+    ## Value: corresponding data frame colname
     metacols <- c(ensembl_gene_id="ENSEMBL",
                   entrezgene="ENTREZID",
                   external_gene_name="SYMBOL",
@@ -78,25 +90,15 @@ build.annot.from.biomart <-
         }
         gene.annot[[metacols[i]]] <- bm[gene.annot$ENSEMBL]
     }
+
+    rownames(gene.annot) <- gene.annot[[keytype]]
+
+    annot.meta <- list(
+        KEYTYPE=keytype,
+        MARTHOST=mart@host,
+        MART=mart@biomart,
+        MARTDATASET=mart@dataset)
+    metadata(gene.annot) %<>% c(annot.meta)
+
     return(gene.annot)
 }
-
-## Defunct code for auto-determining ID type
-
-## if (cmdopts$txdb_geneid_type == "auto") {
-##     idtype.from.meta <- metadata(txdb) %>% as.data.frame %>%
-##         filter(name == "Type of Gene ID") %$% value
-##     ## Try to find key words in the gene ID type
-##     idtype <- idtype.from.meta %>%
-##         str_detect(fixed(names(known.gene.id.types), ignore_case = TRUE)) %>%
-##         which %>% .[1] %>% na.omit %>% known.gene.id.types[.]
-##     if (length(idtype) != 1) {
-##         idtype <- tryCatch({
-##             identify.ids(names(annot), db="org.Hs.eg.db", idtypes=known.gene.id.types)
-##         }, error=function(...) {
-##             NULL
-##         })
-##     }
-## } else {
-##     idtype <- known.gene.id.types[cmdopts$txdb_geneid_type]
-## }
