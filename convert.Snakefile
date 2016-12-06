@@ -34,7 +34,7 @@ rule extract_transcript_seqs:
     output: '{genome_build}_{transcriptome}_transcripts.fa'
     version: CUFFLINKS_VERSION
     shell: '''
-    gffread -w /dev/stdout -g {input.genome_fa:q} {input.transcriptome_gff:q} 2>/dev/null | \
+    gffread -w /dev/stdout -g {input.genome_fa:q} -O {input.transcriptome_gff:q} 2>/dev/null | \
       sed -e 's/^>transcript:/>/' > {output:q}
     '''
 
